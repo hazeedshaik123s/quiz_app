@@ -11,90 +11,61 @@ class QuizApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: "Quiz App",
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: const QuizScreen(),
+      home: QuizPage(),
     );
   }
 }
 
-
-class QuizScreen extends StatefulWidget {
-  const QuizScreen({super.key});
+class QuizPage extends StatefulWidget {
+  const QuizPage({super.key});
 
   @override
-  State<QuizScreen> createState() => _QuizScreenState();
+  State<QuizPage> createState() => _QuizPageState();
 }
 
+class _QuizPageState extends State<QuizPage> {
 
-class _QuizScreenState extends State<QuizScreen> {
-
-  int questionIndex = 0;
+  int index = 0;
   int score = 0;
+  bool finished = false;
 
-
-  final List<Map<String, dynamic>> questions = [
-
+  final questions = [
     {
-      "question": "What is Flutter?",
-      "answers": [
-        {"text": "Database", "score": 0},
-        {"text": "UI Toolkit", "score": 1},
-        {"text": "Operating System", "score": 0},
-        {"text": "Browser", "score": 0},
-      ]
+      "q": "What is Flutter?",
+      "a": ["Database", "UI Toolkit", "Browser", "OS"],
+      "correct": 1
     },
-
     {
-      "question": "Which language is used in Flutter?",
-      "answers": [
-        {"text": "Java", "score": 0},
-        {"text": "Python", "score": 0},
-        {"text": "Dart", "score": 1},
-        {"text": "C++", "score": 0},
-      ]
+      "q": "Which language is used in Flutter?",
+      "a": ["Java", "Python", "Dart", "C++"],
+      "correct": 2
     },
-
     {
-      "question": "Flutter is developed by?",
-      "answers": [
-        {"text": "Google", "score": 1},
-        {"text": "Microsoft", "score": 0},
-        {"text": "Apple", "score": 0},
-        {"text": "Amazon", "score": 0},
-      ]
+      "q": "Flutter is developed by?",
+      "a": ["Google", "Apple", "Microsoft", "Amazon"],
+      "correct": 0
     },
-
     {
-      "question": "Which file is the starting point of Flutter?",
-      "answers": [
-        {"text": "index.html", "score": 0},
-        {"text": "main.dart", "score": 1},
-        {"text": "app.js", "score": 0},
-        {"text": "server.dart", "score": 0},
-      ]
+      "q": "Starting file of Flutter?",
+      "a": ["index.html", "main.dart", "app.js", "server.js"],
+      "correct": 1
     }
-
   ];
 
 
   void answer(int value){
 
+    if(value == questions[index]["correct"]){
+      score++;
+    }
+
     setState(() {
 
-      score += value;
-
-      if(questionIndex < questions.length-1){
-
-        questionIndex++;
-
+      if(index < questions.length - 1){
+        index++;
       }
       else{
-
-        showResult = true;
-
+        finished = true;
       }
 
     });
@@ -102,24 +73,19 @@ class _QuizScreenState extends State<QuizScreen> {
   }
 
 
-  bool showResult=false;
-
-
   void restart(){
 
     setState(() {
-
-      questionIndex=0;
-      score=0;
-      showResult=false;
-
+      index = 0;
+      score = 0;
+      finished = false;
     });
 
   }
 
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context){
 
     return Scaffold(
 
@@ -129,137 +95,88 @@ class _QuizScreenState extends State<QuizScreen> {
       ),
 
 
-      body: showResult
-      ? resultScreen()
-      : quizScreen(),
+      body: finished
+      ? Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
 
-    );
-  }
-
-
-
-  Widget quizScreen(){
-
-    return Padding(
-
-      padding: const EdgeInsets.all(20),
-
-      child: Column(
-
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-
-        children: [
-
-          Text(
-            "Question ${questionIndex+1}/${questions.length}",
-            style: const TextStyle(
-              fontSize:22,
-              fontWeight:FontWeight.bold
-            ),
-          ),
-
-
-          const SizedBox(height:30),
-
-
-          Text(
-
-            questions[questionIndex]["question"],
-
-            style: const TextStyle(
-              fontSize:25,
-              fontWeight:FontWeight.bold
+            Text(
+              "Quiz Completed",
+              style: TextStyle(fontSize:30),
             ),
 
-          ),
+            SizedBox(height:20),
+
+            Text(
+              "Score: $score / ${questions.length}",
+              style: TextStyle(fontSize:25),
+            ),
+
+            SizedBox(height:20),
+
+            ElevatedButton(
+              onPressed: restart,
+              child: Text("Restart"),
+            )
+
+          ],
+        ),
+      )
 
 
-          const SizedBox(height:30),
+      : Padding(
+        padding: EdgeInsets.all(20),
 
+        child: Column(
 
-          ...(questions[questionIndex]["answers"]
-          as List<Map<String,dynamic>>)
-          .map((answer){
+          crossAxisAlignment: CrossAxisAlignment.stretch,
 
-            return ElevatedButton(
+          children: [
 
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.all(15)
+            Text(
+              "Question ${index+1}/${questions.length}",
+              style: TextStyle(
+                fontSize:22,
+                fontWeight:FontWeight.bold
               ),
-
-              onPressed: (){
-
-                this.answer(answer["score"]);
-
-              },
-
-              child: Text(
-                answer["text"],
-                style: const TextStyle(fontSize:18),
-              ),
-
-            );
-
-          }).toList()
-
-
-        ],
-
-      ),
-
-    );
-
-  }
-
-
-
-  Widget resultScreen(){
-
-    return Center(
-
-      child: Column(
-
-        mainAxisAlignment: MainAxisAlignment.center,
-
-        children: [
-
-          const Text(
-            "Quiz Completed!",
-            style: TextStyle(
-              fontSize:30,
-              fontWeight:FontWeight.bold
-            ),
-          ),
-
-
-          const SizedBox(height:20),
-
-
-          Text(
-
-            "Your Score: $score / ${questions.length}",
-
-            style: const TextStyle(
-              fontSize:25
             ),
 
-          ),
+
+            SizedBox(height:30),
 
 
-          const SizedBox(height:30),
+            Text(
+              questions[index]["q"].toString(),
+              style: TextStyle(fontSize:25),
+            ),
 
 
-          ElevatedButton(
+            SizedBox(height:20),
 
-            onPressed: restart,
 
-            child: const Text("Restart Quiz"),
+            ...(questions[index]["a"] as List)
+            .asMap()
+            .entries
+            .map((item){
 
-          )
+              return ElevatedButton(
 
-        ],
+                onPressed: (){
+                  answer(item.key);
+                },
 
-      ),
+                child: Text(
+                  item.value.toString()
+                ),
+
+              );
+
+            })
+
+          ],
+        ),
+      )
 
     );
 
